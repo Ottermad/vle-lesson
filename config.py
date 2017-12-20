@@ -10,7 +10,7 @@ class Config:
 
     SECRET_KEY = os.environ.get('SECRET_KEY', "this_needs_to_be_more_secure")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SERVICE_NAME = 'user'
+    SERVICE_NAME = 'lesson'
 
 
 class Development(Config):
