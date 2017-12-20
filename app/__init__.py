@@ -34,4 +34,7 @@ def create_app(config_name="default"):
     db.init_app(app)
     services.init_app(app)
 
+    from .subject.views import subject_blueprint
+    app.register_blueprint(subject_blueprint)
+
     return app
