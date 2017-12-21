@@ -33,4 +33,3 @@ def subject_individual_view(subject_id):
         if g.user.has_permissions({'Administrator'}):
             return subject_update_view(request, subject_id)
         raise UnauthorizedError()
-

@@ -1,27 +1,48 @@
 from app import db
 
-lesson_teacher = db.Table(
-    'lesson_teacher',
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
-    db.Column('user_id', db.Integer, primary_key=True)
-)
 
-lesson_student = db.Table(
-    'lesson_student',
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
-    db.Column('user_id', db.Integer, primary_key=True)
-)
+class LessonTeacher(db.Model):
+    # __table_args__ = (
+    #     PrimaryKeyConstraint('lesson_id', 'user_id'),
+    #     {},
+    # )
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
+
+    def __init__(self, lesson_id, user_id):
+        self.lesson_id = lesson_id
+        self.user_id = user_id
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id
+        }
+
+
+class LessonStudent(db.Model):
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
+    user_id = db.Column('user_id', db.Integer, primary_key=True)
+
+    def __init__(self, lesson_id, user_id):
+        self.lesson_id = lesson_id
+        self.user_id = user_id
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id
+        }
 
 
 class Lesson(db.Model):
     __mapper_args__ = {'confirm_deleted_rows': False}
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
+    subject_id =db.Column(db.Integer, db.ForeignKey('subject.id'))
     school_id = db.Column(db.Integer)
 
     subject = db.relationship('Subject')
-
+    teachers = db.relationship("LessonTeacher")
+    students = db.relationship("LessonStudent")
     # teachers = db.relationship(
     #     'User', secondary=lesson_teacher,
     #     backref=db.backref('lesson_teacher', lazy='dynamic')
