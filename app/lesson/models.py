@@ -1,4 +1,6 @@
-from app import db
+from app import db, services
+from flask import g
+from internal.exceptions import CustomError
 
 
 class LessonTeacher(db.Model):
@@ -41,8 +43,11 @@ class Lesson(db.Model):
     school_id = db.Column(db.Integer)
 
     subject = db.relationship('Subject')
-    teachers = db.relationship("LessonTeacher")
-    students = db.relationship("LessonStudent")
+    teachers = db.relationship(
+        "LessonTeacher",
+        cascade="all, delete-orphan"
+    )
+    students = db.relationship("LessonStudent", cascade="all, delete-orphan")
     # teachers = db.relationship(
     #     'User', secondary=lesson_teacher,
     #     backref=db.backref('lesson_teacher', lazy='dynamic')
@@ -70,12 +75,24 @@ class Lesson(db.Model):
             lesson_as_dict['subject'] = self.subject.to_dict()
 
         if nest_teachers:
-            lesson_as_dict['teachers'] = [t.to_dict() for t in self.teachers]
+            response = services.user.get("user/user", params={'ids': t.user_id for t in self.teachers}, headers=g.user.headers_dict())
+            if response.status_code != 200:
+                    raise CustomError(
+                        **response.json()
+                    )
+            lesson_as_dict['teachers'] = response.json()['users']
 
         if nest_students:
-            lesson_as_dict['students'] = [s.to_dict() for s in self.students]
+            response = services.user.get("user/user", params={'ids': s.user_id for s in self.students}, headers=g.user.headers_dict())
+            if response.status_code != 200:
+                   raise CustomError(
+                       **response.json()
+                   )
+            lesson_as_dict['students'] = response.json()['users']
 
-        # if nest_homework:
-        #     lesson_as_dict['homework'] = [h.to_dict(date_as_string=True) for h in self.homework]
+
+        if nest_homework:
+            lesson_as_dict['homework'] = []
+            # lesson_as_dict['homework'] = [h.to_dict(date_as_string=True) for h in self.homework]
 
         return lesson_as_dict
