@@ -90,9 +90,14 @@ class Lesson(db.Model):
                    )
             lesson_as_dict['students'] = response.json()['users']
 
-
         if nest_homework:
-            lesson_as_dict['homework'] = []
-            # lesson_as_dict['homework'] = [h.to_dict(date_as_string=True) for h in self.homework]
+            # lesson_as_dict['homework'] = []
+            response = services.homework.get("homework/homework", headers=g.user.headers_dict(), params={'lesson_id': self.id})
+            if response.status_code != 200:
+               raise CustomError(
+                   **response.json()
+               )
+            lesson_as_dict['homework'] = response.json()['homework']
+           # lesson_as_dict['homework'] = [h.to_dict(date_as_string=True) for h in self.homework]
 
         return lesson_as_dict

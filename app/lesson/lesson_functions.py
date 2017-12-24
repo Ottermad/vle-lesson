@@ -97,6 +97,14 @@ def lesson_listing(request):
         subjects = subjects.split(",")
         query = query.filter(Lesson.subject_id.in_(subjects))
 
+    # Filter by students
+    student_ids = request.args.get("student_ids")
+
+    if student_ids is not None:
+        student_ids = student_ids.split(",")
+        lesson_ids = [l.lesson_id for l in LessonStudent.query.filter(LessonStudent.user_id.in_(student_ids))]
+        query = query.filter(Lesson.id.in_(lesson_ids))
+
     lessons = query.all()
     return jsonify({'success': True, 'lessons': [lesson.to_dict(nest_teachers=True) for lesson in lessons]})
 
